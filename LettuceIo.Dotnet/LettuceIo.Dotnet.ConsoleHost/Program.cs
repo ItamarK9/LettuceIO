@@ -38,29 +38,36 @@ namespace LettuceIo.Dotnet.ConsoleHost
         private static bool NewAction(JToken settings)
         {
             var id = settings.Value<string>("id");
+            Log.Debug($"New action {id}");
             if (ActiveActions.ContainsKey(id))
-                throw new Exception($"Key \"{id}\" already exists in the dictionary");
+                try { throw new Exception($"Key \"{id}\" already exists in the dictionary"); }
+                catch (Exception e) { Log.Error($"Action resolved with an Exception:\n{e}"); }
             var action = new ActionFactory().Configure(settings).CreateAction();
             if (!ActiveActions.TryAdd(id, action))
-                throw new Exception($"Key \"{id}\" already exists in the dictionary");
+                try { throw new Exception($"Key \"{id}\" already exists in the dictionary"); }
+                catch (Exception e) { Log.Error($"Action resolved with an Exception:\n{e}"); }            
             action.Metrics.Subscribe(
                 metrics => Connection.Send(id, JObject.FromObject(new {metrics})),
                 error =>
                 {
+                    Log.Error($"Action resolved with an Exception:\n{error}");
                     TerminateAction(id);
                     Connection.Send(id, JObject.FromObject(new {error, metrics = new {isActive = false}}));
                 },
                 () =>
                 {
+                    Log.Information($"Action {id} completed successfully");
                     TerminateAction(id);
                     Connection.Send(id, JObject.FromObject(new {metrics = new {isActive = false}}));
                 });
             try
             {
+                Log.Information($"{id} Action started");
                 action.Start();
             }
             catch (Exception e)
             {
+                Log.Error($"Action resolved with an Exception:\n{e}");
                 TerminateAction(id);
                 throw e;
             }
@@ -71,7 +78,7 @@ namespace LettuceIo.Dotnet.ConsoleHost
         private static void TerminateAction(string id)
         {
             if (ActiveActions.TryRemove(id, out var action) && action.Status != Status.Stopped) action.Stop();
-            
+            Log.Information($"Action {id} as been terminated");
         }
     }
 }
