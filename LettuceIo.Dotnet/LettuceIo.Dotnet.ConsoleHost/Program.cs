@@ -1,10 +1,13 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using System.IO;
 using ElectronCgi.DotNet;
 using LettuceIo.Dotnet.Base;
 using LettuceIo.Dotnet.Core.Enums;
 using LettuceIo.Dotnet.Core.Interfaces;
+using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json.Linq;
+using Serilog;
 
 namespace LettuceIo.Dotnet.ConsoleHost
 {
@@ -14,14 +17,24 @@ namespace LettuceIo.Dotnet.ConsoleHost
             new ConcurrentDictionary<string, IAction>();
 
         private static readonly Connection Connection = new ConnectionBuilder().Build();
-
+        
         private static void Main()
         {
+            var configuration = new ConfigurationBuilder()
+                .SetBasePath(Directory.GetCurrentDirectory())
+                .AddJsonFile("appsettings.json")
+                .Build();
+                
+            Log.Logger = new LoggerConfiguration()
+                .ReadFrom.Configuration(configuration)
+                .CreateLogger();
+            Log.Information("Lettuce.IO up and running!");
+            
             Connection.On<JToken, bool>("NewAction", NewAction);
             Connection.On<string>("TerminateAction", TerminateAction);
             Connection.Listen();
         }
-
+        
         private static bool NewAction(JToken settings)
         {
             var id = settings.Value<string>("id");
