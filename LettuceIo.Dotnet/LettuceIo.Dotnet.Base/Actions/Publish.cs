@@ -26,7 +26,7 @@ namespace LettuceIo.Dotnet.Base.Actions
 
         private readonly IConnectionFactory _connectionFactory;
         private readonly Limits _limits;
-        private readonly string _exchange;
+        private string _exchange;
         private readonly string _folderPath;
         private readonly PublishOptions _options;
         private readonly JsonSerializerSettings _serializerSettings;
@@ -125,9 +125,8 @@ namespace LettuceIo.Dotnet.Base.Actions
             foreach (Type type in pluginAssembly.GetExportedTypes())
             {
                 _plugin = Activator.CreateInstance(type)! as IPlugin ?? throw new InvalidOperationException("Plugin isn't a valid IPlugin");
-                _plugin.PassConnection(_connection);
                 // Starting plugin
-                _plugin!.Start();
+                _exchange = _plugin!.Start(_connection?.Endpoint.HostName,_exchange);
             }
             
             return true;

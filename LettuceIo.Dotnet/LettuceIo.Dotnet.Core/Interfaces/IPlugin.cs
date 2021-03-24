@@ -8,7 +8,7 @@ namespace LettuceIo.Dotnet.Core.Interfaces
     {
         public void SetConnection(string rabbitmqHost);
         public void DeclareTopology(string inExchange, string outExchange);
-        public void Start(string rabbitmqHost, string inExchange, string outExchange);
+        public string Start(string rabbitmqHost, string outExchange);
         public void OnMessage(JObject message);
 
     }
