@@ -38,6 +38,9 @@ const publishDetails = {
         isCustom: false,
         customValue: "",
         isRandom: false
+    },
+    plugin: {
+        path: ""
     }
 };
 

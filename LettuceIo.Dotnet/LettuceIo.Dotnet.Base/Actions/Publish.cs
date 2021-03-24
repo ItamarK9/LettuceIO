@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
+using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using LettuceIo.Dotnet.Base.Extensions;
@@ -30,6 +31,7 @@ namespace LettuceIo.Dotnet.Base.Actions
         private readonly PublishOptions _options;
         private readonly JsonSerializerSettings _serializerSettings;
         private readonly TimeSpan _updateInterval;
+        private IPlugin? _plugin;
         private Metrics _currentMetrics = new Metrics {Count = 0, Duration = TimeSpan.Zero, SizeKB = 0d};
         private readonly ISubject<Metrics> _statsSubject = new Subject<Metrics>();
         private readonly Random _random = new Random();
@@ -62,7 +64,8 @@ namespace LettuceIo.Dotnet.Base.Actions
             IEnumerable<Message> messages = LoadMessages();
             if (_options.Shuffle) messages = messages.Shuffle(_random);
             _connection = _connectionFactory.CreateConnection();
-
+            TryEnablePlugin();
+                            
             //Create publish tasks
             var publishTasks = new List<Task>(_options.Playback
                 ? Enumerable.Range(0, 1).Select(_ => new Task(() =>
@@ -111,6 +114,23 @@ namespace LettuceIo.Dotnet.Base.Actions
             _cts.Cancel();
             _updateTick?.Dispose();
             _connection?.Close();
+            _plugin?.Dispose();
+        }
+
+        private bool TryEnablePlugin()
+        {
+            if (_options.Plugin.Path == "") return false;
+            
+            var pluginAssembly = Assembly.Load(_options.Plugin.Path);
+            foreach (Type type in pluginAssembly.GetExportedTypes())
+            {
+                _plugin = Activator.CreateInstance(type)! as IPlugin ?? throw new InvalidOperationException("Plugin isn't a valid IPlugin");
+                _plugin.PassConnection(_connection);
+                // Starting plugin
+                _plugin!.Start();
+            }
+            
+            return true;
         }
         
         private void Playback(IEnumerable<Message> messages)
@@ -147,7 +167,6 @@ namespace LettuceIo.Dotnet.Base.Actions
 
                 //publish
                 channel.BasicPublish(_exchange, message);
-                // channel.WaitForConfirms();
 
                 //update metrics
                 UpdateMetrics(message);

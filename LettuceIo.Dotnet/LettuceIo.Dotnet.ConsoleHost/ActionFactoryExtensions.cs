@@ -49,7 +49,8 @@ namespace LettuceIo.Dotnet.ConsoleHost
                         Playback = details.Value<bool>("playback"),
                         Shuffle = details.Value<bool>("isShuffle"),
                         RateDetails = ToRateDetails(details["rateDetails"]!),
-                        RoutingKeyDetails = ToRoutingKeyDetails(details["routingKeyDetails"]!)
+                        RoutingKeyDetails = ToRoutingKeyDetails(details["routingKeyDetails"]!),
+                        Plugin = ToPlugin(details["plugin"])
                     };
                     if (f.Exchange == "") //Default AMQP exchange
                     {
@@ -76,6 +77,11 @@ namespace LettuceIo.Dotnet.ConsoleHost
             Password = details.Value<string>("password"),
         };
 
+        public static Plugin ToPlugin(JToken details) => new Plugin
+        {
+            Path = details["path"].ToString()
+        };
+        
         public static Limits ToLimits(JToken details) => new Limits
         {
             Amount = details["countLimit"]!.Value<bool>("status")

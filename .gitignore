@@ -25,3 +25,5 @@ pnpm-debug.log*
 electron-cgi.log
 
 LettuceIO/
+Logs/
+appsettings.json
