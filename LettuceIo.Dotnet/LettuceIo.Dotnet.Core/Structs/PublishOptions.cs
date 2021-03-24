@@ -7,5 +7,6 @@
         public bool Playback;
         public RateDetails RateDetails;
         public RoutingKeyDetails RoutingKeyDetails;
+        public Plugin Plugin;
     }
 }

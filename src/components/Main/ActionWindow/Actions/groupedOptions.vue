@@ -66,7 +66,7 @@ export default {
 }
 
 .main-margins {
-  margin: 20px;
+  margin: 3px;
 }
 
 .checkbox-label {

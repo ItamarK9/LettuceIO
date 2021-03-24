@@ -23,6 +23,7 @@
     "electron-cgi": "^1.0.6",
     "uuid": "^8.3.0",
     "vue": "^2.6.12",
+    "vue-autosuggest": "^2.2.0",
     "vue-axios": "^2.1.5",
     "vue-toastification": "^1.7.8",
     "vue-unique-id": "^3.1.1",

@@ -4,6 +4,13 @@
       <div class="col-4">
         <grouped-options :progress-values="progressValues" v-model="actionDetails" :options="publishOptions"
                          :disabled="disabled"/>
+        
+        <button v-bind:disabled="disabled !== undefined ? disabled : false" @click="selectPlugin"
+                style="margin-top: 3px"
+                class="btn btn-sm btn-outline-success align-self-center align-middle"
+                >Plugin Selector
+        </button>
+
       </div>
       <div class="col-8 justify-content-start" style="margin-top: 20px">
         <div style="text-align: start; margin: 20px" class="top">
@@ -65,7 +72,6 @@
       </div>
     </div>
   </div>
-
 </template>
 
 <script>
@@ -99,6 +105,15 @@ export default {
   components: {
     TextInput,
     groupedOptions,
+  },
+   methods: {
+    selectPlugin() {
+      const {dialog} = require('electron').remote;
+      dialog.showOpenDialog({properties: ['openFile'], defaultPath: __dirname, filters: [ { name: 'Dynamik Link Lib', extensions: ['dll'] }]}).then(value => {
+        this.actionDetails.plugin.path = value.filePaths[0];
+      })
+    }
+
   },
   computed: {
     actionDetails: {
