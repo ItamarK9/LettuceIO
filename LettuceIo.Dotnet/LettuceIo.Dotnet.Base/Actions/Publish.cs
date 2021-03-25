@@ -14,6 +14,7 @@ using LettuceIo.Dotnet.Core.Interfaces;
 using LettuceIo.Dotnet.Core.Structs;
 using Newtonsoft.Json;
 using RabbitMQ.Client;
+using Serilog;
 
 namespace LettuceIo.Dotnet.Base.Actions
 {
@@ -124,9 +125,10 @@ namespace LettuceIo.Dotnet.Base.Actions
             var pluginAssembly = Assembly.Load(_options.Plugin.Path);
             foreach (Type type in pluginAssembly.GetExportedTypes())
             {
-                _plugin = Activator.CreateInstance(type)! as IPlugin ?? throw new InvalidOperationException("Plugin isn't a valid IPlugin");
+                _plugin = Activator.CreateInstance(type)! as IPlugin ?? 
+                          throw new InvalidOperationException("Plugin isn't a valid IPlugin");
                 // Starting plugin
-                _exchange = _plugin!.Start(_connection?.Endpoint.HostName,_exchange);
+                _exchange = _plugin!.Start(_connection?.Endpoint.HostName, _exchange);
             }
             
             return true;

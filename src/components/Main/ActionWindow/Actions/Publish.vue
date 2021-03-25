@@ -110,7 +110,7 @@ export default {
     selectPlugin() {
       const {dialog} = require('electron').remote;
       dialog.showOpenDialog({properties: ['openFile'], defaultPath: __dirname, filters: [ { name: 'Dynamik Link Lib', extensions: ['dll'] }]}).then(value => {
-        this.actionDetails.plugin.path = value.filePaths[0];
+        this.actionDetails.plugin.path = value.filePaths[0] == null ? "" : value.filePaths[0];
       })
     }
 
