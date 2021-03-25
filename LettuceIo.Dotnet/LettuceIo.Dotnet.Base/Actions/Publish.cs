@@ -122,7 +122,7 @@ namespace LettuceIo.Dotnet.Base.Actions
         {
             if (_options.Plugin.Path == "") return false;
             
-            var pluginAssembly = Assembly.Load(_options.Plugin.Path);
+            var pluginAssembly = Assembly.LoadFile(_options.Plugin.Path);
             foreach (Type type in pluginAssembly.GetExportedTypes())
             {
                 _plugin = Activator.CreateInstance(type)! as IPlugin ?? 
